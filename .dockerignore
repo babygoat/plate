@@ -1,0 +1,12 @@
+# directory
+node_modules
+.git
+.circleci
+tests
+
+# file
+*.md
+.gitignore
+.jshintignore
+.jsintrc
+Procfile

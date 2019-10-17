@@ -1,44 +1,28 @@
-FROM node:4.4-slim
+FROM node:10.15-slim
 
-RUN groupadd user && useradd --create-home --home-dir /home/user -g user user
+ARG app_user=keystone_user
+ARG app_group=keystone_user
 
-ENV REACT_SOURCE /usr/src/react/
+RUN groupadd ${app_group} && useradd --create-home --home-dir /home/${app_user} -g ${app_user} ${app_group}
+
 ENV TZ=Asia/Taipei
-WORKDIR $REACT_SOURCE
 
-RUN set -x \
-    && apt-get update \
-    && apt-get install -y vim \
-    && apt-get install -y build-essential \
-    && apt-get install -y apt-transport-https \
-    && apt-get install -y --no-install-recommends curl ca-certificates \
-    && apt-get install -y git \
-    && apt-get install -y graphicsmagick \
-    && apt-get install -y imagemagick \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates graphicsmagick \
     && rm -rf /var/lib/apt/lists/*
 
-RUN buildDeps=' \
-    gcc \
-    make \
-    python \
-    ' \
-    && set -x \
-    && apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/*  
+RUN mkdir -p /home/${app_user}/src
+RUN chmod ${app_user}:${app_group} /home/${app_user}/src
 
-# Install PM2
-RUN npm install -g pm2
-RUN pm2 install pm2-logrotate@2.2.0
-RUN pm2 set pm2-logrotate:retain 7
-RUN pm2 set pm2-logrotate:compress true
-RUN pm2 set pm2-logrotate:rotateInterval '0 3 * * *'
+WORKDIR /home/${app_user}/src
 
 # Copy source files
-COPY . $REACT_SOURCE
-RUN cd $REACT_SOURCE
-RUN npm install 
+COPY . .
 
 # Set time zone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+USER ${app_user}
+
 EXPOSE 3000
-CMD pm2 start --no-daemon keystone.js
+CMD node keystone.js

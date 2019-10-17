@@ -68,5 +68,10 @@
       }
     }
   },
-  "main": "keystone.js"
+  "main": "keystone.js",
+  "pre-commit": [
+    "lint",
+    "validate",
+    "test"
+  ]
 }
