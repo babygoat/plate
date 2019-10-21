@@ -15,6 +15,14 @@ var clientConfig = {
 	],
 };
 
+const js_assets = browserify('./client/scripts', {
+		external: clientConfig.commonPackages,
+		transform: [babelify.configure({
+			plugins: [require('babel-plugin-transform-object-rest-spread'), require('babel-plugin-transform-object-assign')],
+			presets: [require('babel-preset-es2015'), require('babel-preset-react')],
+		})],
+	}) 
+
 // Setup Route Bindings
 exports = module.exports = function(app) {
 
@@ -25,13 +33,7 @@ exports = module.exports = function(app) {
 	}));
 
 	// Serve script bundles
-	app.use('/js', browserify('./client/scripts', {
-		external: clientConfig.commonPackages,
-		transform: [babelify.configure({
-			plugins: [require('babel-plugin-transform-object-rest-spread'), require('babel-plugin-transform-object-assign')],
-			presets: [require('babel-preset-es2015'), require('babel-preset-react')],
-		})],
-	}));
+	app.use('/js', js_assets);
 
 	// Views
 	app.get('/api', function(req, res) {

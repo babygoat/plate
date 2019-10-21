@@ -1,5 +1,4 @@
 # directory
-node_modules
 .git
 .circleci
 tests
